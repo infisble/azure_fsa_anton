@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fsa-frontend
+  namespace: fsa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fsa-frontend
+  template:
+    metadata:
+      labels:
+        app: fsa-frontend
+    spec:
+      containers:
+      - name: fsa-frontend
+        image: fsaantonregistry.azurecr.io/fsa-frontend:latest
+        ports:
+        - containerPort: 80
