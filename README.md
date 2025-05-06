@@ -82,3 +82,4 @@ http://132.164.180.201
 - Aplikácia je nasadená cez Ingress NGINX
 - IP `132.164.180.201` je staticky pridelená pomocou `loadBalancerIP`
 - ACR: `fsaantonregistry`
+- pristup je dany
