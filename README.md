@@ -1,61 +1,84 @@
-# Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.0.0.
+# Angular Frontend – Nasadenie do Azure
 
-Angular Frontend connected to a Spring Boot backend.
+Tento projekt je nasadený v službe Azure Kubernetes Service (AKS) pomocou Docker-u, Azure Container Registry (ACR) a Ingress NGINX.
 
-The frontend is as simple as possible to just show the logic of authentication via a JWT.
+---
 
+## 🌐 Prístup k aplikácii
 
-## Run on local
+👉 Otvor v prehliadači:
 
 ```
-yarn start
+http://132.164.180.201
 ```
 
-The application will run on `http://localhost:4200`
+---
 
-## Components
+## ☁️ Ako nasadiť aplikáciu do Azure
 
-### App Component
+### 1. Pripojenie ku klastru
 
-Main wrapper component. It has no logic inside. It just places the Header and the AppContent.
+```bash
+az aks get-credentials --name vovk-fsatfstate-aks --resource-group vovk-fsatfstate
+```
 
-### Content Component
+---
 
-Displays the Buttons and the Content of the application.
+### 2. Opätovné nasadenie (ak je potrebné)
 
-The Buttons are there to show the login form or logout the user.
+```bash
+kubectl apply -f frontend-service.yaml -n fsa
+kubectl apply -f frontend-ingress.yaml -n fsa
+```
 
-At the beginning, nothing is shown but the WelcomeContent component with a welcome message.
+---
 
-Once authenticated via the login form, the AppContent component displays the AuthContent component with the protected information.
+## 🔁 Ako reštartovať aplikáciu (Angular)
 
-### Buttons Component
+Ak si aktualizoval kód, znovu vytvor a nahraj image:
 
-It displays two buttons. The login button only displays the login form. The logout button removes all the authentication information of the user.
+```bash
+# Lokálne znovu vytvor image
+docker build -t my-angular-app .
+docker tag my-angular-app fsaantonregistry.azurecr.io/fsa-frontend:latest
+docker push fsaantonregistry.azurecr.io/fsa-frontend:latest
 
-### Header Component
+# Reštartuj deployment v Kubernetes
+kubectl rollout restart deployment fsa-frontend -n fsa
+```
 
-Static header with the title and the logo.
+---
 
-### Login Form Component
+## 🧊 Ako pozastaviť klaster (aby si neplatil)
 
-Displays a splitted Form with the Login form on one side and the register form on the other side. 
+```bash
+az aks stop --name vovk-fsatfstate-aks --resource-group vovk-fsatfstate
+```
 
-Submitting one form or the other will request different endpoints in the backend.
+---
 
-### Welcome Content Component
+## ▶️ Ako znova spustiť klaster
 
-Simple component which displays a Welcome message.
+```bash
+az aks start --name vovk-fsatfstate-aks --resource-group vovk-fsatfstate
+```
 
-## Authentication
+Potom sa znova pripoj:
 
-The authentication used is JWT. First, the user must login in the backend with a username and password.
+```bash
+az aks get-credentials --name vovk-fsatfstate-aks --resource-group vovk-fsatfstate
+```
 
-If the credentials are correct, a JWT will be returned.
+A znova otvor:
+```
+http://132.164.180.201
+```
 
-The JWT will be stored in the localstorage for further usage.
+---
 
-When available the JWT will be sent in the Authorization Header for each requests made with axios.
+## ✅ Poznámky
 
+- Aplikácia je nasadená cez Ingress NGINX
+- IP `132.164.180.201` je staticky pridelená pomocou `loadBalancerIP`
+- ACR: `fsaantonregistry`
